@@ -23,6 +23,7 @@ public class ClientControler implements ActionListener{
         view.getBtnConnect().addActionListener(this);
         view.getBtnSend().addActionListener(this);
         view.getBtnDisconnect().addActionListener(this);
+        view.getBtnChooserFile().addActionListener(this);
     }
 
     @Override
@@ -39,6 +40,9 @@ public class ClientControler implements ActionListener{
         }
         if(e.getActionCommand().equals(view.getBtnDisconnect().getText())){
             view.disconnect();
+        }
+        if(e.getActionCommand().equals(view.getBtnChooserFile().getText())){
+            view.chooseFile();
         }
     }
 }

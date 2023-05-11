@@ -4,9 +4,17 @@
  */
 package dangthaihoa.com.vn.server;
 
+import dangthaihoa.com.vn.common.FileInfo;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -140,24 +148,30 @@ public class ServerGUI extends javax.swing.JFrame  {
             public void run() {
                     try {
                             DataInputStream dis = new DataInputStream(socket.getInputStream());
+                            ObjectInputStream ois = null;
                             while (true) {
-                                    String sms = dis.readUTF();
-                                    if(sms.contains("exit")) {
-                                            ServerGUI.listSK.remove(socket);
-                                            model.addElement("Đã ngắt kết nối với " + socket);
-                                            lsHistory.setModel(model);
-                                            dis.close();
-                                            socket.close();
-                                            continue; //Ngắt kết nối rồi
+                                    ois = new ObjectInputStream(socket.getInputStream());
+                                    FileInfo fileInfo = (FileInfo) ois.readObject();
+                                    if (fileInfo != null) {
+                                        createFile(fileInfo);
                                     }
-                                    for (Socket item : ServerGUI.listSK) {
-                                            if(item.getPort() != socket.getPort()) {
-                                                    DataOutputStream dos = new DataOutputStream(item.getOutputStream());
-                                                    dos.writeUTF(sms);
-                                            }
-                                    }
-                                    model.addElement(sms);
-                                    lsHistory.setModel(model);
+//                                    String sms = dis.readUTF();
+//                                    if(sms.contains("exit")) {
+//                                            ServerGUI.listSK.remove(socket);
+//                                            model.addElement("Đã ngắt kết nối với " + socket);
+//                                            lsHistory.setModel(model);
+//                                            dis.close();
+//                                            socket.close();
+//                                            continue; //Ngắt kết nối rồi
+//                                    }
+//                                    for (Socket item : ServerGUI.listSK) {
+//                                            if(item.getPort() != socket.getPort()) {
+//                                                    DataOutputStream dos = new DataOutputStream(item.getOutputStream());
+//                                                    dos.writeUTF(sms);
+//                                            }
+//                                    }
+//                                    model.addElement(sms);
+//                                    lsHistory.setModel(model);
                             }
                     } catch (Exception e) {
                             try {
@@ -168,6 +182,28 @@ public class ServerGUI extends javax.swing.JFrame  {
                     }
             }
     }
+    
+    private boolean createFile(FileInfo fileInfo) {
+        BufferedOutputStream bos = null;
+         
+        try {
+            if (fileInfo != null) {
+                File fileReceive = new File(fileInfo.getDestinationDirectory() 
+                        + fileInfo.getFilename());
+                bos = new BufferedOutputStream(
+                        new FileOutputStream(fileReceive));
+                // write file content
+                bos.write(fileInfo.getDataBytes());
+                bos.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+    
+  
    
     public void write(){
         WriteServer write = new WriteServer();

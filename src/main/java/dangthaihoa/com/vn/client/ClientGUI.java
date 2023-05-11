@@ -4,14 +4,23 @@
  */
 package dangthaihoa.com.vn.client;
 
+import dangthaihoa.com.vn.common.FileInfo;
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
@@ -23,6 +32,7 @@ public class ClientGUI extends javax.swing.JFrame {
 
     private Socket client;
     DefaultListModel model;
+    private int port;
     /**
      * Creates new form ClientGUI
      */
@@ -42,6 +52,7 @@ public class ClientGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jFileChooser1 = new javax.swing.JFileChooser();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         txtPort = new javax.swing.JTextField();
@@ -53,6 +64,8 @@ public class ClientGUI extends javax.swing.JFrame {
         txtSend = new javax.swing.JTextField();
         btnSend = new javax.swing.JButton();
         btnDisconnect = new javax.swing.JButton();
+        btnChooserFile = new javax.swing.JButton();
+        txtPart = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -73,7 +86,9 @@ public class ClientGUI extends javax.swing.JFrame {
 
         btnSend.setText("Gửi");
 
-        btnDisconnect.setText("Ngắt Két Nối");
+        btnDisconnect.setText("Ngắt Kết Nối");
+
+        btnChooserFile.setText("Chọn File");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -83,28 +98,30 @@ public class ClientGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(txtSend, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnSend, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtName)
-                                .addGap(18, 18, 18))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                .addGap(0, 110, Short.MAX_VALUE)
-                                .addComponent(btnDisconnect)
-                                .addGap(54, 54, 54)))
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(17, 17, 17)))
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtName)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(17, 17, 17))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnDisconnect)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(133, 133, 133))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(txtSend, javax.swing.GroupLayout.PREFERRED_SIZE, 373, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnSend, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(txtPart, javax.swing.GroupLayout.PREFERRED_SIZE, 373, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnChooserFile, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -120,13 +137,17 @@ public class ClientGUI extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnDisconnect, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 287, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtSend, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSend, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(13, 13, 13))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtPart, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnChooserFile, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(11, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -168,6 +189,7 @@ public class ClientGUI extends javax.swing.JFrame {
 
 
     public void execute() throws IOException {
+        port = Integer.parseInt(txtPort.getText().toString());
         client = new Socket(InetAddress.getLocalHost(), Integer.parseInt(txtPort.getText().toString()));
         model.addElement("Kết nối với Server ở Port " + txtPort.getText().toString());
         lsHistory.setModel(model);
@@ -196,9 +218,6 @@ public class ClientGUI extends javax.swing.JFrame {
                 }
         }
     }
-    
- 
-
 
     class ReadClient extends Thread{
         private Socket client;
@@ -229,8 +248,15 @@ public class ClientGUI extends javax.swing.JFrame {
     }
     
     public void write(){
-        WriteClient write = new WriteClient(client, txtName.getText().toString());
-        write.start();	
+//        if(txtSend.getText().toString().equals("")){
+                String destinationDir = "D:\\server\\";
+                sendFile(txtPart.getText().toString(), destinationDir);
+//        }else{
+//            WriteClient write = new WriteClient(client, txtName.getText().toString());
+//            write.start();	
+//        }
+
+        
     }
 
     class WriteClient extends Thread{
@@ -246,15 +272,15 @@ public class ClientGUI extends javax.swing.JFrame {
             public void run() {
                     DataOutputStream dos = null;
                     try {
-                            dos = new DataOutputStream(client.getOutputStream());
-                            String sms = txtSend.getText().toString();
-                            if(sms.equals("")){
-                                JOptionPane.showMessageDialog(null, "Vui lòng nhập nội dung tin nhắn", "Cảnh báo", JOptionPane.INFORMATION_MESSAGE);
-                            }else{
-                                dos.writeUTF(name + ": " + sms);
-                                model.addElement(name + ": " + sms);
-                                lsHistory.setModel(model);
-                            }
+                        dos = new DataOutputStream(client.getOutputStream());
+                        String sms = txtSend.getText().toString();
+                        if(sms.equals("")){
+                            JOptionPane.showMessageDialog(null, "Vui lòng nhập nội dung tin nhắn", "Cảnh báo", JOptionPane.INFORMATION_MESSAGE);
+                        }else{
+                            dos.writeUTF(name + ": " + sms);
+                            model.addElement(name + ": " + sms);
+                            lsHistory.setModel(model);
+                        }
 
                     } catch (Exception e) {
                             try {
@@ -266,6 +292,59 @@ public class ClientGUI extends javax.swing.JFrame {
                     }
             }
 
+    }
+    
+    public void sendFile(String sourceFilePath, String destinationDir) {
+        DataOutputStream outToServer = null;
+        ObjectOutputStream oos = null;
+        ObjectInputStream ois = null;
+ 
+        try {
+            // make greeting
+            outToServer = new DataOutputStream(client.getOutputStream());
+ 
+            // get file info
+            FileInfo fileInfo = getFileInfo(sourceFilePath, destinationDir);
+ 
+            // send file
+            oos = new ObjectOutputStream(client.getOutputStream());
+            oos.writeObject(fileInfo);
+ 
+       
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    private FileInfo getFileInfo(String sourceFilePath, String destinationDir) {
+        FileInfo fileInfo = null;
+        BufferedInputStream bis = null;
+        try {
+            File sourceFile = new File(sourceFilePath);
+            bis = new BufferedInputStream(new FileInputStream(sourceFile));
+            fileInfo = new FileInfo();
+            byte[] fileBytes = new byte[(int) sourceFile.length()];
+            // get file info
+            bis.read(fileBytes, 0, fileBytes.length);
+            fileInfo.setFilename(sourceFile.getName());
+            fileInfo.setDataBytes(fileBytes);
+            fileInfo.setDestinationDirectory(destinationDir);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } 
+        return fileInfo;
+    }
+    
+    public void chooseFile() {
+        final JFileChooser fc = new JFileChooser();
+        fc.showOpenDialog(this);
+        try {
+            if (fc.getSelectedFile() != null) {
+                txtPart.setText(fc.getSelectedFile().getPath());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public JButton getBtnConnect() {
@@ -291,18 +370,29 @@ public class ClientGUI extends javax.swing.JFrame {
     public void setBtnDisconnect(JButton btnDisconnect) {
         this.btnDisconnect = btnDisconnect;
     }
+
+    public JButton getBtnChooserFile() {
+        return btnChooserFile;
+    }
+
+    public void setBtnChooserFile(JButton btnChooserFile) {
+        this.btnChooserFile = btnChooserFile;
+    }
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnChooserFile;
     private javax.swing.JButton btnConnect;
     private javax.swing.JButton btnDisconnect;
     private javax.swing.JButton btnSend;
+    private javax.swing.JFileChooser jFileChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JList<String> lsHistory;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtPart;
     private javax.swing.JTextField txtPort;
     private javax.swing.JTextField txtSend;
     // End of variables declaration//GEN-END:variables
