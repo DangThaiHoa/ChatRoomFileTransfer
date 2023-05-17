@@ -6,10 +6,12 @@ package dangthaihoa.com.vn.client;
 
 import dangthaihoa.com.vn.common.FileInfo;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -245,12 +247,20 @@ public class ClientGUI extends javax.swing.JFrame {
         @Override
         public void run() {
             DataInputStream dis = null;
+            ObjectInputStream ois = null;
             try {
                 dis = new DataInputStream(client.getInputStream());
                 while(true) {
                         String sms = dis.readUTF();
                         model.addElement(sms);
                         lsHistory.setModel(model);
+                        if(sms.contains("file")){
+                            ois = new ObjectInputStream(client.getInputStream());
+                            FileInfo fileInfo = (FileInfo) ois.readObject();
+                            if (fileInfo != null) {
+                                createFile(fileInfo);
+                            }
+                        }
                 }
             } catch (Exception e) {
                 try {
@@ -261,6 +271,24 @@ public class ClientGUI extends javax.swing.JFrame {
                 }
             }
         }
+    }
+    
+    private boolean createFile(FileInfo fileInfo) {
+        BufferedOutputStream bos = null;
+         
+        try {
+            if (fileInfo != null) {
+                File fileReceive = new File("F:\\test\\" + fileInfo.getFilename());
+                bos = new BufferedOutputStream(new FileOutputStream(fileReceive));
+                // write file content
+                bos.write(fileInfo.getDataBytes());
+                bos.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
     
     public void write(){
@@ -274,6 +302,8 @@ public class ClientGUI extends javax.swing.JFrame {
         dos.writeUTF("file");
         String destinationDir = "F:\\server\\";
         sendFile(txtPart.getText().toString(), destinationDir);
+        File sourceFile = new File(txtPart.getText().toString());
+        dos.writeUTF("SendFile:" + sourceFile.getName());
     }
 
     class WriteClient extends Thread{
@@ -310,7 +340,7 @@ public class ClientGUI extends javax.swing.JFrame {
             }
 
     }
-    
+  
     public void sendFile(String sourceFilePath, String destinationDir) throws UnknownHostException, IOException {
         DataOutputStream outToServer = null;
         ObjectOutputStream oos = null;

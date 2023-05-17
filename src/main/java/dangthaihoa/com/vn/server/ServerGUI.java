@@ -5,10 +5,12 @@
 package dangthaihoa.com.vn.server;
 
 import dangthaihoa.com.vn.common.FileInfo;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +19,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import javax.swing.DefaultListModel;
@@ -165,21 +168,30 @@ public class ServerGUI extends javax.swing.JFrame  {
                                             socket.close();
                                             continue; //Ngắt kết nối rồi
                                     }
-                                    for (Socket item : ServerGUI.listSK) {
+                                    String[] output = sms.split(":");
+                                    if(output[0].contains("SendFile")){
+
+                                        for (Socket item : ServerGUI.listSK){
+                                            DataOutputStream outToServer = new DataOutputStream(item.getOutputStream());
+                                            FileInfo fileInfo = getFileInfo("F:\\server\\" + output[1]);
+                                            // send file
+                                            ObjectOutputStream oos = new ObjectOutputStream(item.getOutputStream());
+                                            oos.writeObject(fileInfo);
+                                        }
+                                    }else{
+                                        for (Socket item : ServerGUI.listSK) {
                                             if(item.getPort() != socket.getPort()) {
                                                     DataOutputStream dos = new DataOutputStream(item.getOutputStream());
                                                     dos.writeUTF(sms);
-                                            }
+                                        }
+                                     }
                                     }
+                                    
                                     model.addElement(sms);
                                     lsHistory.setModel(model);
                             }
                     } catch (Exception e) {
-                            try {
-                                    socket.close();
-                            } catch (IOException ex) {
-                                    System.out.println("Ngắt kết nối Server");
-                            }
+                       
                     }
             }
     }
@@ -200,6 +212,24 @@ public class ServerGUI extends javax.swing.JFrame  {
             return false;
         }
         return true;
+    }
+    
+    private FileInfo getFileInfo(String sourceFilePath) {
+        FileInfo fileInfo = null;
+        BufferedInputStream bis = null;
+        try {
+            File sourceFile = new File(sourceFilePath);
+            bis = new BufferedInputStream(new FileInputStream(sourceFile));
+            fileInfo = new FileInfo();
+            byte[] fileBytes = new byte[(int) sourceFile.length()];
+            // get file info
+            bis.read(fileBytes, 0, fileBytes.length);
+            fileInfo.setFilename(sourceFile.getName());
+            fileInfo.setDataBytes(fileBytes);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } 
+        return fileInfo;
     }
     
     public void write(){
