@@ -134,8 +134,7 @@ public class ServerGUI extends javax.swing.JFrame  {
             ReadServer read = new ReadServer(socket);
             read.start();
         }
-    }
-	
+    }	
 
     class ReadServer extends Thread {
             private Socket socket;
@@ -150,28 +149,30 @@ public class ServerGUI extends javax.swing.JFrame  {
                             DataInputStream dis = new DataInputStream(socket.getInputStream());
                             ObjectInputStream ois = null;
                             while (true) {
-                                    ois = new ObjectInputStream(socket.getInputStream());
-                                    FileInfo fileInfo = (FileInfo) ois.readObject();
-                                    if (fileInfo != null) {
-                                        createFile(fileInfo);
+                                    String sms = dis.readUTF();
+                                    if(sms.contains("file")){
+                                        ois = new ObjectInputStream(socket.getInputStream());
+                                        FileInfo fileInfo = (FileInfo) ois.readObject();
+                                        if (fileInfo != null) {
+                                            createFile(fileInfo);
+                                        }
                                     }
-//                                    String sms = dis.readUTF();
-//                                    if(sms.contains("exit")) {
-//                                            ServerGUI.listSK.remove(socket);
-//                                            model.addElement("Đã ngắt kết nối với " + socket);
-//                                            lsHistory.setModel(model);
-//                                            dis.close();
-//                                            socket.close();
-//                                            continue; //Ngắt kết nối rồi
-//                                    }
-//                                    for (Socket item : ServerGUI.listSK) {
-//                                            if(item.getPort() != socket.getPort()) {
-//                                                    DataOutputStream dos = new DataOutputStream(item.getOutputStream());
-//                                                    dos.writeUTF(sms);
-//                                            }
-//                                    }
-//                                    model.addElement(sms);
-//                                    lsHistory.setModel(model);
+                                    if(sms.contains("exit")) {
+                                            ServerGUI.listSK.remove(socket);
+                                            model.addElement("Đã ngắt kết nối với " + socket);
+                                            lsHistory.setModel(model);
+                                            dis.close();
+                                            socket.close();
+                                            continue; //Ngắt kết nối rồi
+                                    }
+                                    for (Socket item : ServerGUI.listSK) {
+                                            if(item.getPort() != socket.getPort()) {
+                                                    DataOutputStream dos = new DataOutputStream(item.getOutputStream());
+                                                    dos.writeUTF(sms);
+                                            }
+                                    }
+                                    model.addElement(sms);
+                                    lsHistory.setModel(model);
                             }
                     } catch (Exception e) {
                             try {
@@ -188,10 +189,8 @@ public class ServerGUI extends javax.swing.JFrame  {
          
         try {
             if (fileInfo != null) {
-                File fileReceive = new File(fileInfo.getDestinationDirectory() 
-                        + fileInfo.getFilename());
-                bos = new BufferedOutputStream(
-                        new FileOutputStream(fileReceive));
+                File fileReceive = new File(fileInfo.getDestinationDirectory() + fileInfo.getFilename());
+                bos = new BufferedOutputStream(new FileOutputStream(fileReceive));
                 // write file content
                 bos.write(fileInfo.getDataBytes());
                 bos.flush();
@@ -203,12 +202,9 @@ public class ServerGUI extends javax.swing.JFrame  {
         return true;
     }
     
-  
-   
     public void write(){
         WriteServer write = new WriteServer();
         write.start();
-  
     }
 
     class WriteServer extends Thread {

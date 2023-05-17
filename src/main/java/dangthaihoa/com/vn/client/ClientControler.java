@@ -24,6 +24,7 @@ public class ClientControler implements ActionListener{
         view.getBtnSend().addActionListener(this);
         view.getBtnDisconnect().addActionListener(this);
         view.getBtnChooserFile().addActionListener(this);
+        view.getBtnSendFile().addActionListener(this);
     }
 
     @Override
@@ -43,6 +44,13 @@ public class ClientControler implements ActionListener{
         }
         if(e.getActionCommand().equals(view.getBtnChooserFile().getText())){
             view.chooseFile();
+        }
+        if(e.getActionCommand().equals(view.getBtnSendFile().getText())){
+            try {
+                view.File();
+            } catch (IOException ex) {
+                Logger.getLogger(ClientControler.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 }
